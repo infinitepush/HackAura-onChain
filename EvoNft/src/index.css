@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* NFT Evolution Marketplace Design System */
+
+@layer base {
+  :root {
+    /* Core backgrounds */
+    --background: 220 30% 5%;
+    --foreground: 210 40% 98%;
+
+    /* Card surfaces */
+    --card: 220 25% 8%;
+    --card-foreground: 210 40% 98%;
+    --card-hover: 220 25% 12%;
+
+    /* Interactive surfaces */
+    --popover: 220 25% 8%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Brand colors - Electric Blue Evolution Theme */
+    --primary: 194 100% 60%;
+    --primary-foreground: 220 30% 5%;
+    --primary-glow: 194 100% 70%;
+
+    /* Secondary - Purple Mutation Theme */
+    --secondary: 270 70% 60%;
+    --secondary-foreground: 210 40% 98%;
+    --secondary-glow: 270 70% 70%;
+
+    /* Muted tones */
+    --muted: 220 15% 15%;
+    --muted-foreground: 215 15% 65%;
+
+    /* Accent - Neon Green for active states */
+    --accent: 120 100% 60%;
+    --accent-foreground: 220 30% 5%;
+
+    /* Status colors */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    
+    --success: 120 60% 50%;
+    --success-foreground: 210 40% 98%;
+
+    /* Interface elements */
+    --border: 220 20% 15%;
+    --input: 220 20% 15%;
+    --ring: 194 100% 60%;
+
+    /* Design tokens */
+    --radius: 0.75rem;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(194 100% 60%), hsl(270 70% 60%));
+    --gradient-card: linear-gradient(135deg, hsl(220 25% 8%), hsl(220 25% 12%));
+    --gradient-evolution: linear-gradient(90deg, hsl(194 100% 60%), hsl(120 100% 60%), hsl(270 70% 60%));
+    
+    /* Shadows and glows */
+    --shadow-nft: 0 10px 30px -10px hsl(194 100% 60% / 0.3);
+    --shadow-glow: 0 0 40px hsl(194 100% 60% / 0.4);
+    --shadow-mutation: 0 0 30px hsl(270 70% 60% / 0.5);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
