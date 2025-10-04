@@ -35,27 +35,35 @@ export const MutationModal = ({ isOpen, onClose, nft }: MutationModalProps) => {
   const handleGenerate = async () => {
     if (!nft) return;
 
-    console.log("🚀 [EVOLVE DEBUG] Evolution process started for:", nft.name);
-    console.log("🏷️ [EVOLVE DEBUG] Original NFT tags:", nft.tags);
-
+    console.log("🚀 [EVOLVE DEBUG] Full evolution process started for:", nft.name);
     setIsGenerating(true);
 
-    // --- Market Analysis Step ---
-    console.log("🔍 [EVOLVE DEBUG] Starting market analysis...");
     try {
-      const analysisPayload = {
+      const evolutionPayload = {
+        nftId: nft.id,
+        name: nft.name,
         base_tags: nft.tags,
+        image: nft.image,
         max_new_tags: 3,
       };
-      console.log("📦 [EVOLVE DEBUG] Sending payload to analysis API via proxy:", JSON.stringify(analysisPayload, null, 2));
+      console.log("📦 [EVOLVE DEBUG] Sending payload for full evolution:", JSON.stringify(evolutionPayload, null, 2));
 
-      const analysisResponse = await apiClient.post('/api/analyze-tags', analysisPayload);
+      const response = await apiClient.post('/api/evolve-prompt', evolutionPayload);
 
-      console.log("✅ [EVOLVE DEBUG] SUCCESS: Market analysis complete.");
-      console.log("📈 [EVOLVE DEBUG] Analysis API Response Status:", analysisResponse.status);
-      console.log("📊 [EVOLVE DEBUG] Analysis API Response Data:", analysisResponse.data);
+      console.log("✅ [EVOLVE DEBUG] SUCCESS: Evolution complete.");
+      if (response.data.updatedNft) {
+        console.log("🖼️ [EVOLVE DEBUG] Evolved NFT data:", response.data.updatedNft);
+        setGeneratedImage(response.data.updatedNft.picture);
+      } else if (response.data.imageData) {
+        console.log("🖼️ [EVOLVE DEBUG] Received image data.");
+        // Assuming the backend sends a base64 string
+        const imageSrc = `data:image/jpeg;base64,${response.data.imageData}`;
+        setGeneratedImage(imageSrc);
+      }
+      setShowDecision(true);
+
     } catch (error) {
-      console.error("❌ [EVOLVE DEBUG] ERROR: Market analysis failed.");
+      console.error("❌ [EVOLVE DEBUG] ERROR: Evolution process failed.");
       if (isAxiosError(error)) {
         console.error("💀 [EVOLVE DEBUG] Axios error details:", {
           message: error.message,
@@ -66,30 +74,9 @@ export const MutationModal = ({ isOpen, onClose, nft }: MutationModalProps) => {
       } else {
         console.error("💀 [EVOLVE DEBUG] Non-Axios error details:", error);
       }
-    }
-    console.log("🔍 [EVOLVE DEBUG] Market analysis step finished.");
-    // --- End of Market Analysis Step ---
-
-    // Simulate AI generation delay
-    console.log("🤖 [EVOLVE DEBUG] Simulating AI image generation (3 seconds)...");
-    setTimeout(() => {
-      console.log("🖼️ [EVOLVE DEBUG] AI image generation complete.");
-      setGeneratedImage("/placeholder.svg"); // In real app, this would be the AI-generated image
+    } finally {
       setIsGenerating(false);
-      setShowDecision(true);
-    }, 3000);
-  };
-
-  const handleKeep = () => {
-    // Handle keep NFT logic
-    onClose();
-    resetModal();
-  };
-
-  const handleAuction = () => {
-    // Handle auction logic
-    onClose();
-    resetModal();
+    }
   };
 
   const resetModal = () => {
@@ -99,10 +86,25 @@ export const MutationModal = ({ isOpen, onClose, nft }: MutationModalProps) => {
     setShowDecision(false);
   };
 
+  const handleClose = () => {
+    onClose();
+    resetModal();
+  };
+
+  const handleKeep = () => {
+    // Handle keep NFT logic
+    handleClose();
+  };
+
+  const handleAuction = () => {
+    // Handle auction logic
+    handleClose();
+  };
+
   if (!nft) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="max-w-2xl bg-gradient-card border-primary/30">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold bg-gradient-evolution bg-clip-text text-transparent">
