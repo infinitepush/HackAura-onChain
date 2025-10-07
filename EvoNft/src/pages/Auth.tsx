@@ -14,7 +14,7 @@ export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loginForm, setLoginForm] = useState({ email: '', password: '' });
-  const [signupForm, setSignupForm] = useState({ name: '', email: '', password: '' });
+  const [signupForm, setSignupForm] = useState({ name: '', username: '', email: '', password: '' });
   
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -60,7 +60,7 @@ export default function Auth() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!signupForm.name || !signupForm.email || !signupForm.password) {
+    if (!signupForm.name || !signupForm.username || !signupForm.email || !signupForm.password) {
       toast({
         title: "Error", 
         description: "Please fill in all fields",
@@ -182,6 +182,18 @@ export default function Auth() {
                       placeholder="enter your name"
                       value={signupForm.name}
                       onChange={(e) => setSignupForm(prev => ({ ...prev, name: e.target.value }))}
+                      disabled={isLoading}
+                      className="bg-background/50 border-primary/20"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-username">Username</Label>
+                    <Input
+                      id="signup-username"
+                      type="text"
+                      placeholder="enter your username"
+                      value={signupForm.username}
+                      onChange={(e) => setSignupForm(prev => ({ ...prev, username: e.target.value }))}
                       disabled={isLoading}
                       className="bg-background/50 border-primary/20"
                     />

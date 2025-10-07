@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createAuction, getAuctions, getMyAuctions, placeBid } = require('../controllers/auctionController');
+const { createAuction, getAuctions, getMyAuctions, placeBid, clearAuctions } = require('../controllers/auctionController');
 const isLoggedIn = require('../middlewares/isLoggedIn');
 
 // All routes in this file are protected
@@ -17,5 +17,8 @@ router.get('/my-auctions', getMyAuctions);
 
 // POST /api/auctions/bid - Place a bid on an auction
 router.post('/bid', placeBid);
+
+// DELETE /api/auctions/clear - Clear all auctions
+router.delete('/clear', clearAuctions);
 
 module.exports = router;

@@ -16,6 +16,7 @@ interface NFTCardProps {
   actionLabel?: string;
   timeLeft?: string;
   evolutionHistory: any[];
+  showHistoryButton?: boolean;
 }
 
 export const NFTCard = ({
@@ -30,7 +31,8 @@ export const NFTCard = ({
   onHistoryClick,
   actionLabel = "Buy Now",
   timeLeft,
-  evolutionHistory
+  evolutionHistory,
+  showHistoryButton = true,
 }: NFTCardProps) => {
   return (
     <Card className="group overflow-hidden border-primary/20 bg-gradient-card hover:border-primary/40 hover:shadow-nft transition-all duration-300 hover:scale-105">
@@ -99,7 +101,7 @@ export const NFTCard = ({
             {actionLabel}
           </Button>
         )}
-        {evolutionHistory && evolutionHistory.length > 0 && (
+        {showHistoryButton && evolutionHistory && evolutionHistory.length > 0 && (
           <Button
             onClick={onHistoryClick}
             variant="outline"

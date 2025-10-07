@@ -77,3 +77,13 @@ exports.placeBid = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+
+exports.clearAuctions = async (req, res) => {
+  try {
+    await Auction.deleteMany({});
+    res.status(200).json({ success: true, message: "All auctions cleared" });
+  } catch (error) {
+    console.error("Error clearing auctions:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
