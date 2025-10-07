@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt");
 
 module.exports.register = (req, res) => {
   try {
-    let { name, username, email, password } = req.body;
+    let { name, email, password } = req.body;
     //hasing our password using bcrypt
     bcrypt.genSalt(10, function (err, salt) {
       bcrypt.hash(password, salt, async function (err, hash) {
@@ -19,7 +19,6 @@ module.exports.register = (req, res) => {
           }
           let newUser = await userModel.create({
             fullname: name,
-            username,
             email,
             password: hash,
           });
@@ -34,7 +33,7 @@ module.exports.register = (req, res) => {
           let token = generateToken(newUser);
           // adding cookie in the browser
           res.cookie("token", token);
-          res.status(200).json({ user: { id: newUser._id, name: newUser.fullname, username: newUser.username, email: newUser.email }, token });
+          res.status(200).json({ user: { id: newUser._id, name: newUser.fullname, email: newUser.email }, token });
         }
       });
     });
@@ -58,7 +57,7 @@ module.exports.login = async (req, res) => {
     if(result){
         let token = generateToken(user);
         res.cookie("token", token);
-        res.status(200).json({ user: { id: user._id, name: user.fullname, username: user.username, email: user.email }, token });
+        res.status(200).json({ user: { id: user._id, name: user.fullname, email: user.email }, token });
     }
     else{
       res.status(400).json({ error: "invalid credentials" });

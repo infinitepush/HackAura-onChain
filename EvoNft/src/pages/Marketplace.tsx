@@ -17,7 +17,6 @@ interface Auction {
   };
   seller: {
     username: string;
-    fullname: string;
   };
   currentPrice: number;
   endTime: string;
@@ -159,11 +158,10 @@ export default function Marketplace() {
               image={auction.nft.picture.replace("ipfs://", "https://ipfs.io/ipfs/")}
               price={auction.currentPrice.toString()}
               tags={auction.nft.tags}
-              owner={auction.seller.username || auction.seller.fullname}
+              owner={auction.seller.username}
               actionLabel="Place Bid"
               onAction={() => console.log('Buy NFT:', auction.nft._id)}
               evolutionHistory={auction.nft.evolutionHistory}
-              showHistoryButton={false}
             />
           ))}
         </div>
