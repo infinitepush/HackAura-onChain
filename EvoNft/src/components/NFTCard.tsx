@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Zap, Clock, User } from "lucide-react";
+import { Zap, Clock, User, History } from "lucide-react";
 
 interface NFTCardProps {
   id: string;
@@ -12,8 +12,10 @@ interface NFTCardProps {
   owner?: string;
   isOwned?: boolean;
   onAction?: () => void;
+  onHistoryClick?: () => void;
   actionLabel?: string;
   timeLeft?: string;
+  evolutionHistory: any[];
 }
 
 export const NFTCard = ({
@@ -25,8 +27,10 @@ export const NFTCard = ({
   owner,
   isOwned = false,
   onAction,
+  onHistoryClick,
   actionLabel = "Buy Now",
-  timeLeft
+  timeLeft,
+  evolutionHistory
 }: NFTCardProps) => {
   return (
     <Card className="group overflow-hidden border-primary/20 bg-gradient-card hover:border-primary/40 hover:shadow-nft transition-all duration-300 hover:scale-105">
@@ -84,7 +88,7 @@ export const NFTCard = ({
         </div>
       </CardContent>
 
-      <CardFooter className="p-4 pt-0">
+      <CardFooter className="p-4 pt-0 flex-col">
         {onAction && (
           <Button
             onClick={onAction}
@@ -93,6 +97,16 @@ export const NFTCard = ({
           >
             {isOwned && <Zap className="h-4 w-4" />}
             {actionLabel}
+          </Button>
+        )}
+        {evolutionHistory && evolutionHistory.length > 0 && (
+          <Button
+            onClick={onHistoryClick}
+            variant="outline"
+            className="w-full mt-2"
+          >
+            <History className="h-4 w-4 mr-2" />
+            Show History
           </Button>
         )}
       </CardFooter>

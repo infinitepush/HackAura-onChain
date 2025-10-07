@@ -137,34 +137,34 @@ exports.evolveImagePrompt = async (req, res) => {
 };
 
 exports.evolveNft = async (req, res) => {
-  try {
-    const { nftId, newImage, newTags } = req.body;
-
-    if (!nftId || !newImage || !newTags) {
-      return res.status(400).json({ success: false, message: 'nftId, newImage, and newTags are required' });
-    }
-
-    const nft = await Nft.findById(nftId);
-
-    if (!nft) {
-      return res.status(404).json({ success: false, message: 'NFT not found' });
-    }
-
-    // Add current state to history
-    nft.evolutionHistory.push({
-      picture: nft.picture,
-      tags: nft.tags,
-    });
-
-    // Update to new state
-    nft.picture = newImage;
-    nft.tags = newTags;
-
-    const updatedNft = await nft.save();
-
-    res.status(200).json({ success: true, nft: updatedNft });
-  } catch (error) {
-    console.error('Error evolving NFT:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-};
+		try {
+			const { nftId, newImage, newTags } = req.body;
+	
+			if (!nftId || !newImage || !newTags) {
+				return res.status(400).json({ success: false, message: 'nftId, newImage, and newTags are required' });
+			}
+	
+			const nft = await Nft.findById(nftId);
+	
+			if (!nft) {
+				return res.status(404).json({ success: false, message: 'NFT not found' });
+			}
+	
+			// Add current state to history
+			nft.evolutionHistory.push({
+				picture: nft.picture,
+				tags: nft.tags,
+			});
+	
+			// Update to new state
+			nft.picture = newImage;
+			nft.tags = newTags;
+	
+			const updatedNft = await nft.save();
+	
+			res.status(200).json({ success: true, nft: updatedNft });
+		} catch (error) {
+			console.error('Error evolving NFT:', error);
+			res.status(500).json({ success: false, message: 'Server error' });
+		}
+	};

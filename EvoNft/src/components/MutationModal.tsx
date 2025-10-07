@@ -18,6 +18,7 @@ import { isAxiosError } from "axios";
 interface MutationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onNftUpdate: () => void;
   nft: {
     id: string;
     name: string;
@@ -26,10 +27,11 @@ interface MutationModalProps {
   } | null;
 }
 
-export const MutationModal = ({ isOpen, onClose, nft }: MutationModalProps) => {
+export const MutationModal = ({ isOpen, onClose, nft, onNftUpdate }: MutationModalProps) => {
   const [newTags, setNewTags] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [generatedTags, setGeneratedTags] = useState<string[]>([]);
   const [showDecision, setShowDecision] = useState(false);
 
   const handleGenerate = async () => {
@@ -54,11 +56,13 @@ export const MutationModal = ({ isOpen, onClose, nft }: MutationModalProps) => {
       if (response.data.updatedNft) {
         console.log("🖼️ [EVOLVE DEBUG] Evolved NFT data:", response.data.updatedNft);
         setGeneratedImage(response.data.updatedNft.picture);
+        setGeneratedTags(response.data.updatedNft.tags);
       } else if (response.data.imageData) {
         console.log("🖼️ [EVOLVE DEBUG] Received image data.");
         // Assuming the backend sends a base64 string
         const imageSrc = `data:image/jpeg;base64,${response.data.imageData}`;
         setGeneratedImage(imageSrc);
+        setGeneratedTags(response.data.generatedTags);
       }
       setShowDecision(true);
 
@@ -83,6 +87,7 @@ export const MutationModal = ({ isOpen, onClose, nft }: MutationModalProps) => {
     setNewTags("");
     setIsGenerating(false);
     setGeneratedImage(null);
+    setGeneratedTags([]);
     setShowDecision(false);
   };
 
@@ -91,9 +96,22 @@ export const MutationModal = ({ isOpen, onClose, nft }: MutationModalProps) => {
     resetModal();
   };
 
-  const handleKeep = () => {
-    // Handle keep NFT logic
-    handleClose();
+  const handleKeep = async () => {
+    if (!nft || !generatedImage || generatedTags.length === 0) return;
+
+    try {
+      const evolutionPayload = {
+        nftId: nft.id,
+        newImage: generatedImage,
+        newTags: generatedTags,
+      };
+
+      await apiClient.post('/api/nfts/evolve', evolutionPayload);
+      onNftUpdate();
+      handleClose();
+    } catch (error) {
+      console.error("Error keeping NFT:", error);
+    }
   };
 
   const handleAuction = () => {
@@ -197,5 +215,5 @@ export const MutationModal = ({ isOpen, onClose, nft }: MutationModalProps) => {
         </div>
       </DialogContent>
     </Dialog>
-  );                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+  );
 };

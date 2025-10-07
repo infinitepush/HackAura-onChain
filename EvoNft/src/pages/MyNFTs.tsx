@@ -15,6 +15,7 @@ interface Nft {
   name: string;
   picture: string;
   tags: string[];
+  evolutionHistory: any[];
   evolutionCount?: number; // Optional as it's not in the backend schema
 }
 
@@ -25,6 +26,7 @@ interface NftCardProps {
   image: string;
   tags: string[];
   evolutionCount: number;
+  evolutionHistory: any[];
 }
 
 
@@ -34,6 +36,8 @@ export default function MyNFTs() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [selectedNftHistory, setSelectedNftHistory] = useState<any[]>([]);
 
   const [newNFT, setNewNFT] = useState<{
     name: string;
@@ -68,6 +72,11 @@ export default function MyNFTs() {
   const handleEvolveNFT = (nft: NftCardProps) => {
     setSelectedNFT(nft);
     setIsModalOpen(true);
+  };
+
+  const handleHistoryClick = (nft: NftCardProps) => {
+    setSelectedNftHistory(nft.evolutionHistory);
+    setIsHistoryModalOpen(true);
   };
 
   const handleCreateNFT = () => {
@@ -155,7 +164,8 @@ export default function MyNFTs() {
     name: nft.name,
     image: nft.picture.replace("ipfs://", "https://ipfs.io/ipfs/"), // Convert IPFS URI to HTTP URL
     tags: nft.tags,
-    evolutionCount: nft.evolutionCount || 0, // Default to 0
+    evolutionCount: nft.evolutionHistory.length,
+    evolutionHistory: nft.evolutionHistory,
   }));
 
 
@@ -230,6 +240,7 @@ export default function MyNFTs() {
                   isOwned={true}
                   actionLabel="Evolve NFT"
                   onAction={() => handleEvolveNFT(nft)}
+                  onHistoryClick={() => handleHistoryClick(nft)}
                 />
               </div>
             ))}
@@ -362,8 +373,40 @@ export default function MyNFTs() {
       <MutationModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        onNftUpdate={fetchMyNfts}
         nft={selectedNFT}
       />
+
+      {/* History Modal */}
+      <Dialog open={isHistoryModalOpen} onOpenChange={setIsHistoryModalOpen}>
+        <DialogContent className="max-w-md bg-gradient-card border-primary/30">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-foreground">
+              Evolution History
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {selectedNftHistory.map((evolution, index) => (
+              <div key={index} className="flex items-center space-x-4">
+                <img
+                  src={evolution.picture.replace("ipfs://", "https://ipfs.io/ipfs/")}
+                  alt={`Evolution ${index + 1}`}
+                  className="w-16 h-16 rounded-lg object-cover border border-primary/30"
+                />
+                <div className="flex-1">
+                  <div className="flex flex-wrap gap-1">
+                    {evolution.tags.map((tag: string, tagIndex: number) => (
+                      <Badge key={tagIndex} variant="outline" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
