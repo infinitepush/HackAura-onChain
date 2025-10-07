@@ -114,9 +114,36 @@ export const MutationModal = ({ isOpen, onClose, nft, onNftUpdate }: MutationMod
     }
   };
 
-  const handleAuction = () => {
-    // Handle auction logic
-    handleClose();
+  const handleAuction = async () => {
+    if (!nft || !generatedImage || generatedTags.length === 0) return;
+
+    try {
+      // First, evolve the NFT
+      const evolutionPayload = {
+        nftId: nft.id,
+        newImage: generatedImage,
+        newTags: generatedTags,
+      };
+      const evolveResponse = await apiClient.post('/api/nfts/evolve', evolutionPayload);
+      const updatedNft = evolveResponse.data.nft;
+
+      // Then, create the auction with the evolved NFT
+      // TODO: Add a form to get starting price and end time from the user
+      const startingPrice = 1; // Hardcoded for now
+      const endTime = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
+
+      const auctionPayload = {
+        nftId: updatedNft._id,
+        startingPrice,
+        endTime,
+      };
+
+      await apiClient.post('/api/auctions/create', auctionPayload);
+      onNftUpdate();
+      handleClose();
+    } catch (error) {
+      console.error("Error creating auction:", error);
+    }
   };
 
   if (!nft) return null;

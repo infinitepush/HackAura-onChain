@@ -21,6 +21,7 @@ const userRouter = require("./routes/userRouter");
 const nftRouter = require("./routes/nftRouter");
 const uploadRouter = require("./routes/uploadRouter");
 const apiRouter = require("./routes/apiRouter");
+const auctionRouter = require("./routes/auctionRouter");
 
 // main route for health check
 app.get("/", (req, res) => {
@@ -30,6 +31,7 @@ app.get("/", (req, res) => {
 app.use("/user", userRouter);
 app.use("/api", apiRouter);
 app.use("/api/nfts", nftRouter);
+app.use("/api/auctions", auctionRouter);
 app.use("/", uploadRouter); // Mount at root to get /upload-image
 
 connectDB();
