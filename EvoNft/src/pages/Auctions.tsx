@@ -29,7 +29,7 @@ export default function Auctions() {
 
   const fetchAuctions = async () => {
     try {
-      const response = await apiClient.get("/api/auctions");
+      const response = await apiClient.get("/api/auctions/my-auctions");
       if (response.data.success) {
         setAuctions(response.data.auctions);
       }
@@ -42,10 +42,20 @@ export default function Auctions() {
     fetchAuctions();
   }, []);
 
-  const handlePlaceBid = (auctionId: string) => {
-    console.log(`Placing bid of ${bidAmount} ETH on auction ${auctionId}`);
-    setBidAmount("");
-    setSelectedAuction(null);
+  const handlePlaceBid = async (auctionId: string) => {
+    try {
+      const response = await apiClient.post("/api/auctions/bid", {
+        auctionId,
+        bidAmount: parseFloat(bidAmount),
+      });
+      if (response.data.success) {
+        fetchAuctions();
+        setBidAmount("");
+        setSelectedAuction(null);
+      }
+    } catch (error) {
+      console.error("Error placing bid:", error);
+    }
   };
 
   const getTimeLeft = (endTime: string) => {
@@ -85,10 +95,10 @@ export default function Auctions() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-4 bg-gradient-evolution bg-clip-text text-transparent">
-            Live Auctions
+            My Auctions
           </h1>
           <p className="text-muted-foreground text-lg">
-            Bid on rare evolved NFTs from the community
+            Manage your ongoing auctions
           </p>
         </div>
 
@@ -211,10 +221,10 @@ export default function Auctions() {
             </div>
             <h3 className="text-xl font-semibold mb-2 text-foreground">No Active Auctions</h3>
             <p className="text-muted-foreground mb-6">
-              Check back later for new evolved NFT auctions
+              You have not created any auctions yet.
             </p>
             <Button variant="outline">
-              View Marketplace
+              Create Auction
             </Button>
           </div>
         )}

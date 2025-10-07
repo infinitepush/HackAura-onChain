@@ -1,71 +1,50 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { NFTCard } from "@/components/NFTCard";
 import { Search, Filter, TrendingUp, Grid, List } from "lucide-react";
-import cyberPhoenixImg from "@/assets/cyber-phoenix.jpg";
-import digitalDragonImg from "@/assets/digital-dragon.jpg";
-import neonWolfImg from "@/assets/neon-wolf.jpg";
+import apiClient from "@/lib/axios";
 
-const mockNFTs = [
-  {
-    id: "1",
-    name: "Cyber Phoenix",
-    image: cyberPhoenixImg,
-    price: "2.5",
-    tags: ["cyber", "phoenix", "glowing", "rare"],
-    owner: "0x1a2b...3c4d"
-  },
-  {
-    id: "2", 
-    name: "Digital Dragon",
-    image: digitalDragonImg,
-    price: "1.8",
-    tags: ["dragon", "digital", "ethereal"],
-    owner: "0x5e6f...7g8h"
-  },
-  {
-    id: "3",
-    name: "Neon Wolf",
-    image: neonWolfImg, 
-    price: "3.2",
-    tags: ["wolf", "neon", "wild", "legendary"],
-    owner: "0x9i0j...1k2l"
-  },
-  {
-    id: "4",
-    name: "Crystal Cat",
-    image: "/placeholder.svg",
-    price: "1.2",
-    tags: ["crystal", "cat", "mystical"],
-    owner: "0xab1c...2d3e"
-  },
-  {
-    id: "5",
-    name: "Thunder Eagle",
-    image: "/placeholder.svg",
-    price: "4.1",
-    tags: ["thunder", "eagle", "storm", "epic"],
-    owner: "0xef4g...5h6i"
-  },
-  {
-    id: "6",
-    name: "Shadow Panther",
-    image: "/placeholder.svg",
-    price: "2.9",
-    tags: ["shadow", "panther", "stealth"],
-    owner: "0xjk7l...8m9n"
-  }
-];
+interface Auction {
+  _id: string;
+  nft: {
+    _id: string;
+    name: string;
+    picture: string;
+    tags: string[];
+    evolutionHistory: any[];
+  };
+  seller: {
+    username: string;
+  };
+  currentPrice: number;
+  endTime: string;
+  bids: any[];
+}
 
 const popularTags = ["cyber", "digital", "glowing", "ethereal", "neon", "crystal", "legendary", "rare", "epic"];
 
 export default function Marketplace() {
+  const [auctions, setAuctions] = useState<Auction[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [sortBy, setSortBy] = useState("price-low");
+
+  const fetchAuctions = async () => {
+    try {
+      const response = await apiClient.get("/api/auctions");
+      if (response.data.success) {
+        setAuctions(response.data.auctions);
+      }
+    } catch (error) {
+      console.error("Error fetching auctions:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAuctions();
+  }, []);
 
   const handleTagClick = (tag: string) => {
     setSelectedTags(prev => 
@@ -75,9 +54,9 @@ export default function Marketplace() {
     );
   };
 
-  const filteredNFTs = mockNFTs.filter(nft => {
-    const matchesSearch = nft.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTags = selectedTags.length === 0 || selectedTags.some(tag => nft.tags.includes(tag));
+  const filteredAuctions = auctions.filter(auction => {
+    const matchesSearch = auction.nft.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTags = selectedTags.length === 0 || selectedTags.some(tag => auction.nft.tags.includes(tag));
     return matchesSearch && matchesTags;
   });
 
@@ -132,7 +111,7 @@ export default function Marketplace() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <span className="text-sm text-muted-foreground">
-                {filteredNFTs.length} NFTs
+                {filteredAuctions.length} NFTs
               </span>
               {selectedTags.length > 0 && (
                 <Button
@@ -171,17 +150,23 @@ export default function Marketplace() {
             ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
             : "grid-cols-1"
         }`}>
-          {filteredNFTs.map((nft) => (
+          {filteredAuctions.map((auction) => (
             <NFTCard
-              key={nft.id}
-              {...nft}
-              actionLabel="Buy Now"
-              onAction={() => console.log('Buy NFT:', nft.id)}
+              key={auction._id}
+              id={auction.nft._id}
+              name={auction.nft.name}
+              image={auction.nft.picture.replace("ipfs://", "https://ipfs.io/ipfs/")}
+              price={auction.currentPrice.toString()}
+              tags={auction.nft.tags}
+              owner={auction.seller.username}
+              actionLabel="Place Bid"
+              onAction={() => console.log('Buy NFT:', auction.nft._id)}
+              evolutionHistory={auction.nft.evolutionHistory}
             />
           ))}
         </div>
 
-        {filteredNFTs.length === 0 && (
+        {filteredAuctions.length === 0 && (
           <div className="text-center py-16">
             <div className="w-24 h-24 mx-auto mb-6 bg-gradient-primary rounded-full flex items-center justify-center opacity-50">
               <Search className="h-12 w-12 text-primary-foreground" />
