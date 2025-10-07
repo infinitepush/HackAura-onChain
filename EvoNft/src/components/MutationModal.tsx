@@ -197,5 +197,5 @@ export const MutationModal = ({ isOpen, onClose, nft }: MutationModalProps) => {
         </div>
       </DialogContent>
     </Dialog>
-  );
+  );                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 };

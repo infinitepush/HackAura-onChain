@@ -8,6 +8,14 @@ const nftSchema = new mongoose.Schema({
     },
     name: String,
     picture: String,
+    evolutionHistory: {
+        type: [{
+            picture: String,
+            tags: Array,
+            evolvedAt: { type: Date, default: Date.now }
+        }],
+        default: []
+    }
 });
 
 module.exports = mongoose.model("nft", nftSchema);
