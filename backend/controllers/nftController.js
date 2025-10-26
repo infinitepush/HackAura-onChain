@@ -7,7 +7,7 @@ const FormData = require('form-data');
 
 exports.createNft = async (req, res) => {
   try {
-    const { name, tags, picture } = req.body;
+    const { name, tags, picture, txHash, tokenId } = req.body;
     const userId = req.user.id; // from isLoggedIn middleware
 
     if (!name || !picture) {
@@ -19,6 +19,8 @@ exports.createNft = async (req, res) => {
       name,
       tags: tags || [],
       picture,
+      txHash,
+      tokenId,
     });
 
     const savedNft = await newNft.save();
@@ -56,15 +58,22 @@ exports.evolveImagePrompt = async (req, res) => {
       return res.status(400).json({ success: false, message: 'nftId, name, base_tags, and image are required.' });
     }
 
-    // 1. Generate the prompt
-    const analysisResponse = await axios.post('https://mk-analysis-1.onrender.com/analyze', {
-      base_tag: base_tags[0],
-      max_new_tags,
-    }, {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    let analysisResponse;
+    try {
+      // 1. Generate the prompt
+      analysisResponse = await axios.post('https://mk-analysis-1.onrender.com/analyze', {
+        base_tag: base_tags[0],
+        max_new_tags,
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    } catch (error) {
+      console.error('Error from analysis API:', error);
+      throw error;
+    }
+
     const { base_tag, generated_tags } = analysisResponse.data;
     const tagsString = generated_tags.join(', ');
     const generatedPrompt = `Visually stunning masterpiece titled '${name}'. A ${base_tag} creation embodying styles of ${tagsString}. High detail, captivating aesthetic, digital evolution. It should be an evolved, mature version of the character with an aura of mystic power and strength, retaining some of the original features but showing a more powerful, aged, and wise appearance, with a slight weathered charm.`;
@@ -74,24 +83,32 @@ exports.evolveImagePrompt = async (req, res) => {
     const imageResponse = await axios.get(imageUrl, { responseType: 'arraybuffer' });
     const imageBuffer = Buffer.from(imageResponse.data); 
 
-    // 3. Call the image-to-image generation API using FormData (multipart/form-data)
-    const formData = new FormData();
-    formData.append('prompt', generatedPrompt);
-    formData.append('init_image', imageBuffer, {
-        filename: 'image.jpg', 
-        contentType: 'image/jpeg', 
-    });
-    formData.append('strength', '0.35');
-
-    const imageGenResponse = await axios.post(
-        'https://image-gen-zaqj.onrender.com/img2img',
-        formData,
-        {
-            headers: formData.getHeaders(),
-            // Keep responseType as 'arraybuffer' for the expected binary image result
-            responseType: 'arraybuffer' 
-        }
-    );
+    let imageGenResponse;
+    try {
+          const contentType = imageResponse.headers['content-type'] || 'image/jpeg';
+          const filename = `image.${contentType.split('/')[1]}`;
+      
+          // 3. Call the image-to-image generation API using FormData (multipart/form-data)
+          const formData = new FormData();
+          formData.append('prompt', generatedPrompt);
+          formData.append('init_image', imageBuffer, {
+              filename: filename, 
+              contentType: contentType, 
+          });      formData.append('strength', '0.35');
+  
+      imageGenResponse = await axios.post(
+          'https://image-gen-zaqj.onrender.com/img2img',
+          formData,
+          {
+              headers: formData.getHeaders(),
+              // Keep responseType as 'arraybuffer' for the expected binary image result
+              responseType: 'arraybuffer' 
+          }
+      );
+    } catch (error) {
+      console.error('Error from image generation API:', error);
+      throw error;
+    }
     
     // The response is the image data itself. Convert it to base64.
     const imageData = Buffer.from(imageGenResponse.data, 'binary').toString('base64');

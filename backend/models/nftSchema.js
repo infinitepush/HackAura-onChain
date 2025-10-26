@@ -8,6 +8,8 @@ const nftSchema = new mongoose.Schema({
     },
     name: String,
     picture: String,
+    txHash: String,
+    tokenId: String,
     evolutionHistory: {
         type: [{
             picture: String,

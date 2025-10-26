@@ -33,12 +33,18 @@ export const MutationModal = ({ isOpen, onClose, nft, onNftUpdate }: MutationMod
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [generatedTags, setGeneratedTags] = useState<string[]>([]);
   const [showDecision, setShowDecision] = useState(false);
+  const [isRateLimited, setIsRateLimited] = useState(false);
 
   const handleGenerate = async () => {
-    if (!nft) return;
+    if (!nft || isRateLimited) return;
 
     console.log("🚀 [EVOLVE DEBUG] Full evolution process started for:", nft.name);
     setIsGenerating(true);
+    setIsRateLimited(true);
+
+    setTimeout(() => {
+      setIsRateLimited(false);
+    }, 60000); // 60 second cooldown
 
     try {
       const evolutionPayload = {
@@ -68,16 +74,29 @@ export const MutationModal = ({ isOpen, onClose, nft, onNftUpdate }: MutationMod
 
     } catch (error) {
       console.error("❌ [EVOLVE DEBUG] ERROR: Evolution process failed.");
-      if (isAxiosError(error)) {
+      let errorMessage = "An unexpected error occurred. Please try again.";
+
+      if (isAxiosError(error) && error.response) {
         console.error("💀 [EVOLVE DEBUG] Axios error details:", {
           message: error.message,
           code: error.code,
-          status: error.response?.status,
-          data: error.response?.data,
+          status: error.response.status,
+          data: error.response.data,
         });
+
+        // Check for the specific insufficient balance error
+        const errorDetails = error.response.data?.details?.error;
+        if (typeof errorDetails === 'string' && errorDetails.includes("insufficient_balance")) {
+          errorMessage = "Image evolution failed due to insufficient funds with the provider. Please contact support.";
+        } else {
+          errorMessage = error.response.data?.message || "An error occurred during evolution.";
+        }
       } else {
         console.error("💀 [EVOLVE DEBUG] Non-Axios error details:", error);
       }
+
+      alert(errorMessage); // Using alert as a fallback for user notification
+
     } finally {
       setIsGenerating(false);
     }
@@ -188,9 +207,10 @@ export const MutationModal = ({ isOpen, onClose, nft, onNftUpdate }: MutationMod
                 onClick={handleGenerate}
                 variant="evolution"
                 className="w-full"
+                disabled={isRateLimited}
               >
                 <Zap className="h-4 w-4" />
-                Begin Evolution
+                {isRateLimited ? "Cooldown..." : "Begin Evolution"}
               </Button>
             </div>
           )}

@@ -40,14 +40,23 @@ module.exports.uploadImage = async (req, res) => {
     });
     console.log('[UPLOAD] Metadata uploaded to Pinata:', metadataResult.IpfsHash);
 
+    let mintTxHash = null;
+    let mintTokenId = null;
+
     try {
       const mintPayload = {
-        to: '0x5c55d91583CC15709Ee086Db68524f8721FF0c2b',
+        to: req.body.walletAddress || '0x5c55d91583CC15709Ee086Db68524f8721FF0c2b',
         metadataUri: `ipfs://${metadataResult.IpfsHash}`,
       };
+      console.log('[MINT] Wallet Address:', mintPayload.to);
+      console.log('[MINT] Metadata URI:', mintPayload.metadataUri);
       console.log('[MINT] Calling minting service with payload:', JSON.stringify(mintPayload, null, 2));
-      const mintResponse = await axios.post('https://evo-nft-web3.onrender.com/mint', mintPayload);
+      const mintResponse = await axios.post('https://marketface-web3.onrender.com/mint', mintPayload);
       console.log('[MINT] SUCCESS: Minting service responded with:', mintResponse.data);
+      if (mintResponse.data.success) {
+        mintTxHash = mintResponse.data.txHash;
+        mintTokenId = mintResponse.data.tokenId;
+      }
     } catch (mintError) {
       console.error('[MINT] ERROR: Error calling minting service:', mintError.message);
       if (mintError.response) {
@@ -128,6 +137,8 @@ module.exports.uploadImage = async (req, res) => {
       metadataUri: `ipfs://${metadataResult.IpfsHash}`,
       metadata: metadata,
       analysis: analysisResult,
+      txHash: mintTxHash,
+      tokenId: mintTokenId,
     };
 
     console.log('[UPLOAD] Sending final response to client.');

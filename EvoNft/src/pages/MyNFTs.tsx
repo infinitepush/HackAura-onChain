@@ -122,14 +122,15 @@ export default function MyNFTs() {
       }
 
       const uploadData = uploadResponse.data;
-      console.log("✅ Image uploaded successfully:", uploadData);
-      console.log("📊 Analysis Result:", uploadData.analysis);
+      console.log("Minted Token ID:", uploadData.tokenId);
 
       // Step 2: Save NFT data to our backend
       const nftDataToSave = {
         name: newNFT.name,
         tags: attributes,
         picture: uploadData.metadata.image, // Use the IPFS link from the response
+        txHash: uploadData.txHash,
+        tokenId: uploadData.tokenId,
       };
 
       const saveResponse = await apiClient.post('/api/nfts/create', nftDataToSave);
